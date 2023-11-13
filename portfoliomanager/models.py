@@ -2,18 +2,31 @@ from django.db import models
 from django.urls import reverse
 
 
-class Instrument(models.Model):
+class Portfolio(models.Model):
     """Represents stocks or options"""
     underlying = models.CharField(max_length=20)
-    symbol = models.CharField(max_length=32)
-    expiration_date = models.DateField()
-    strike = models.FloatField()
+    symbol = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=50, blank=True, null=True)
+    expiration_date = models.DateField(blank=True, null=True) # Change this with JS. If stock->True, else False.
+    strike = models.FloatField(blank=True, null=True) # Change this with JS
+    quantity = models.IntegerField(default=0)
+    
+    SIDE = (
+        ('S', 'Short'),
+        ('L', 'Long'),
+    )
 
     INSTRUMENT_TYPE = (
         ('C', 'Call'),
         ('P', 'Put'),
         ('S', 'Stock'),
 
+    )
+
+    side = models.CharField(
+        max_length = 1,
+        choices = SIDE,
+        help_text = "Short or Long"
     )
 
     type = models.CharField(
@@ -26,24 +39,14 @@ class Instrument(models.Model):
     class Meta:
         ordering = ['expiration_date']
 
-    
+
 
     def __str__(self):
-        return f"{self.underlying} {type} : {self.strike} {self.expiration_date} "
+        return f"{self.symbol} "
     
     def get_absolute_url(self):
         return reverse("model-detail-view", args=[str(self.id)])
-    
-class Portfolio(models.Model):
-    
-    name = models.CharField(max_length=32, default='Default Portfolio', unique=True)
-    instrument = models.ManyToManyField(Instrument)
 
-    def __str__(self):
-        return f"{self.name}"
-    
-    def get_absolute_url(self):
-        pass
 
 
     
